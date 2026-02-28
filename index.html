@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaskFlow | To-Do List</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Proyecto U1</p>
+          <h1>TaskFlow</h1>
+        </div>
+        <button id="themeToggle" class="ghost-btn" type="button" aria-label="Cambiar tema">🌙</button>
+      </header>
+
+      <main>
+        <section id="authSection" class="card auth-card">
+          <div class="auth-tabs" role="tablist" aria-label="Autenticación">
+            <button class="tab active" type="button" data-mode="login">Iniciar sesión</button>
+            <button class="tab" type="button" data-mode="register">Registro</button>
+          </div>
+
+          <form id="authForm" class="form-stack">
+            <label>
+              Correo electrónico
+              <input id="emailInput" type="email" required placeholder="usuario@correo.com" />
+            </label>
+            <label>
+              Contraseña
+              <input id="passwordInput" type="password" minlength="6" required placeholder="******" />
+            </label>
+            <button id="authSubmit" type="submit">Entrar</button>
+          </form>
+          <p class="hint">*Esta autenticación es local para pruebas. Luego puedes conectarlo a Supabase.</p>
+        </section>
+
+        <section id="todoSection" class="hidden">
+          <div class="card welcome-card">
+            <div>
+              <h2 id="welcomeTitle">Bienvenido</h2>
+              <p id="statsText">0 pendientes · 0 completadas</p>
+            </div>
+            <button id="logoutBtn" class="ghost-btn" type="button">Cerrar sesión</button>
+          </div>
+
+          <div class="card form-card">
+            <h3 id="taskFormTitle">Agregar tarea</h3>
+            <form id="taskForm" class="form-stack">
+              <label>
+                Título *
+                <input id="taskTitle" type="text" required maxlength="80" placeholder="Ej: Preparar exposición" />
+              </label>
+              <label>
+                Descripción
+                <textarea id="taskDescription" rows="3" maxlength="240" placeholder="Detalles opcionales..."></textarea>
+              </label>
+              <div class="task-meta-grid">
+                <label>
+                  Fecha de caducidad
+                  <input id="taskDueDate" type="date" />
+                </label>
+                <label>
+                  Categoría
+                  <input id="taskCategory" type="text" maxlength="40" placeholder="Ej: estudio" list="categorySuggestions" />
+                  <datalist id="categorySuggestions"></datalist>
+                </label>
+              </div>
+              <button id="taskSubmit" type="submit">Guardar tarea</button>
+              <button id="taskCancel" type="button" class="ghost-btn hidden">Cancelar edición</button>
+            </form>
+          </div>
+
+          <div class="card filters-card">
+            <h3>Filtros</h3>
+            <div class="filters-grid">
+              <label>
+                Estado
+                <select id="statusFilter">
+                  <option value="all">Todas</option>
+                  <option value="pending">Pendientes</option>
+                  <option value="completed">Completadas</option>
+                </select>
+              </label>
+              <label>
+                Buscar
+                <input id="searchInput" type="search" placeholder="Título o descripción" />
+              </label>
+            </div>
+          </div>
+
+          <section id="tasksList" class="tasks-grid" aria-live="polite"></section>
+        </section>
+      </main>
+    </div>
+
+    <template id="taskTemplate">
+      <article class="card task-card">
+        <div class="task-head">
+          <label class="check-wrap">
+            <input class="task-check" type="checkbox" />
+            <span class="check-label">Pendiente</span>
+          </label>
+          <div class="task-actions">
+            <button class="ghost-btn edit-btn" type="button">Editar</button>
+            <button class="danger-btn delete-btn" type="button">Eliminar</button>
+          </div>
+        </div>
+        <h4 class="task-title"></h4>
+        <p class="task-description"></p>
+        <div class="task-tags">
+          <span class="task-category hidden"></span>
+          <span class="task-due hidden"></span>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
