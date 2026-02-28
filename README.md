@@ -6,6 +6,8 @@ Aplicación web de gestión de tareas pensada para escritorio y móvil.
 
 - Registro e inicio de sesión (simulado con `localStorage`, listo para reemplazar por Supabase).
 - CRUD completo de tareas: crear, editar, eliminar y marcar como completadas.
+- Fecha de caducidad por tarea.
+- Categorías reutilizables: al crear una categoría queda guardada para futuras tareas.
 - Filtros por estado y búsqueda por texto.
 - Panel de estadísticas con pendientes/completadas.
 - Tema claro/oscuro.

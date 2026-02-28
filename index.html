@@ -57,6 +57,17 @@
                 Descripción
                 <textarea id="taskDescription" rows="3" maxlength="240" placeholder="Detalles opcionales..."></textarea>
               </label>
+              <div class="task-meta-grid">
+                <label>
+                  Fecha de caducidad
+                  <input id="taskDueDate" type="date" />
+                </label>
+                <label>
+                  Categoría
+                  <input id="taskCategory" type="text" maxlength="40" placeholder="Ej: estudio" list="categorySuggestions" />
+                  <datalist id="categorySuggestions"></datalist>
+                </label>
+              </div>
               <button id="taskSubmit" type="submit">Guardar tarea</button>
               <button id="taskCancel" type="button" class="ghost-btn hidden">Cancelar edición</button>
             </form>
@@ -99,6 +110,10 @@
         </div>
         <h4 class="task-title"></h4>
         <p class="task-description"></p>
+        <div class="task-tags">
+          <span class="task-category hidden"></span>
+          <span class="task-due hidden"></span>
+        </div>
       </article>
     </template>
 

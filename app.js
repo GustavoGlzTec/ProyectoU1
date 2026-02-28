@@ -2,6 +2,7 @@ const STORAGE_KEYS = {
   users: "taskflow-users",
   session: "taskflow-session",
   tasks: "taskflow-tasks",
+  categories: "taskflow-categories",
   theme: "taskflow-theme"
 };
 
@@ -28,6 +29,9 @@ const el = {
   taskFormTitle: document.getElementById("taskFormTitle"),
   taskTitle: document.getElementById("taskTitle"),
   taskDescription: document.getElementById("taskDescription"),
+  taskDueDate: document.getElementById("taskDueDate"),
+  taskCategory: document.getElementById("taskCategory"),
+  categorySuggestions: document.getElementById("categorySuggestions"),
   taskSubmit: document.getElementById("taskSubmit"),
   taskCancel: document.getElementById("taskCancel"),
   statusFilter: document.getElementById("statusFilter"),
@@ -67,6 +71,50 @@ function saveTaskMap(map) {
   writeStorage(STORAGE_KEYS.tasks, map);
 }
 
+function getCategoryList() {
+  return readStorage(STORAGE_KEYS.categories, []);
+}
+
+function saveCategoryList(categories) {
+  writeStorage(STORAGE_KEYS.categories, categories);
+}
+
+function addCategoryIfNew(name) {
+  if (!name) return;
+  const normalized = name.trim().toLowerCase();
+  if (!normalized) return;
+
+  const categories = getCategoryList();
+  if (categories.includes(normalized)) return;
+
+  categories.push(normalized);
+  categories.sort((a, b) => a.localeCompare(b));
+  saveCategoryList(categories);
+}
+
+function renderCategorySuggestions() {
+  const categories = getCategoryList();
+  el.categorySuggestions.innerHTML = "";
+
+  categories.forEach((category) => {
+    const option = document.createElement("option");
+    option.value = category;
+    el.categorySuggestions.append(option);
+  });
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const [year, month, day] = dateStr.split("-").map(Number);
+  if (!year || !month || !day) return dateStr;
+
+  return new Date(year, month - 1, day).toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+}
+
 function getTasksForUser(userEmail) {
   const taskMap = getTaskMap();
   return taskMap[userEmail] || [];
@@ -78,11 +126,13 @@ function saveTasksForUser(userEmail, tasks) {
   saveTaskMap(taskMap);
 }
 
-function createTask(title, description) {
+function createTask(title, description, dueDate, category) {
   return {
     id: crypto.randomUUID(),
     title,
     description,
+    dueDate,
+    category,
     completed: false,
     createdAt: Date.now()
   };
@@ -137,7 +187,8 @@ function getFilteredTasks(tasks) {
     const textMatch =
       !text ||
       task.title.toLowerCase().includes(text) ||
-      task.description.toLowerCase().includes(text);
+      task.description.toLowerCase().includes(text) ||
+      (task.category || "").toLowerCase().includes(text);
 
     return statusMatch && textMatch;
   });
@@ -171,6 +222,8 @@ function renderTasks() {
     const card = fragment.querySelector(".task-card");
     const check = fragment.querySelector(".task-check");
     const checkLabel = fragment.querySelector(".check-label");
+    const categoryTag = fragment.querySelector(".task-category");
+    const dueTag = fragment.querySelector(".task-due");
 
     card.dataset.id = task.id;
     card.classList.toggle("done", task.completed);
@@ -179,6 +232,16 @@ function renderTasks() {
 
     fragment.querySelector(".task-title").textContent = task.title;
     fragment.querySelector(".task-description").textContent = task.description || "Sin descripción";
+
+    if (task.category) {
+      categoryTag.textContent = `🏷️ ${task.category}`;
+      categoryTag.classList.remove("hidden");
+    }
+
+    if (task.dueDate) {
+      dueTag.textContent = `📅 ${formatDate(task.dueDate)}`;
+      dueTag.classList.remove("hidden");
+    }
 
     check.addEventListener("change", () => toggleTaskStatus(task.id));
     fragment.querySelector(".edit-btn").addEventListener("click", () => startEditTask(task.id));
@@ -227,6 +290,8 @@ function handleTaskSubmit(event) {
 
   const title = el.taskTitle.value.trim();
   const description = el.taskDescription.value.trim();
+  const dueDate = el.taskDueDate.value;
+  const category = el.taskCategory.value.trim().toLowerCase();
 
   if (!title) return;
 
@@ -234,14 +299,16 @@ function handleTaskSubmit(event) {
 
   if (state.editingTaskId) {
     const updated = tasks.map((task) =>
-      task.id === state.editingTaskId ? { ...task, title, description } : task
+      task.id === state.editingTaskId ? { ...task, title, description, dueDate, category } : task
     );
     saveTasksForUser(state.currentUser.email, updated);
   } else {
-    tasks.push(createTask(title, description));
+    tasks.push(createTask(title, description, dueDate, category));
     saveTasksForUser(state.currentUser.email, tasks);
   }
 
+  addCategoryIfNew(category);
+  renderCategorySuggestions();
   resetTaskForm();
   renderTasks();
 }
@@ -259,6 +326,8 @@ function startEditTask(taskId) {
   el.taskCancel.classList.remove("hidden");
   el.taskTitle.value = task.title;
   el.taskDescription.value = task.description;
+  el.taskDueDate.value = task.dueDate || "";
+  el.taskCategory.value = task.category || "";
   el.taskTitle.focus();
 }
 
@@ -332,6 +401,7 @@ function bindEvents() {
 }
 
 initTheme();
+renderCategorySuggestions();
 bindEvents();
 restoreSession();
 renderAuthState();
